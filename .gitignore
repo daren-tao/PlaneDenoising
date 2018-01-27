@@ -30,3 +30,8 @@
 *.exe
 *.out
 *.app
+
+# WIN
+Win32
+*.dir
+build
