@@ -73,40 +73,6 @@ void plane_from_points(std::vector<Vec> points)
 int main()
 {
 	PlyParser parser("../ressources/Ply/test10.ply");
-	std::vector<Vec> directions;
-	Vec total(0, 0, 0);
 	srand(time(NULL));
-	float minx = 0;
-	float maxx = 0;
-	float miny = 0;
-	float maxy = 0;
-	float minz = 0;
-	float maxz = 0;
-	for (int i = 0; i < 1000; i++)
-	{
-		if (parser._vectors[i].x < minx)
-			minx = parser._vectors[i].x;
-
-		if (parser._vectors[i].y < miny)
-			miny = parser._vectors[i].y;
-
-		if (parser._vectors[i].z < minz)
-			minz = parser._vectors[i].z;
-
-
-
-		if (parser._vectors[i].x > maxx)
-			maxx = parser._vectors[i].x;
-
-		if (parser._vectors[i].y > maxy)
-			maxy = parser._vectors[i].y;
-
-		if (parser._vectors[i].z > maxz)
-			maxz = parser._vectors[i].z;
-	}
-	float x = maxx - minx;
-	float y = maxy - miny;
-	float z = maxz - minz;
-	//floaz gg = pRef.n.dot(Vec(-0.65266f, -0.864288f, -0.493803f).normalize());
 	std::cout << "Bonjour !" << std::endl;
 }
