@@ -17,11 +17,11 @@ void	getRand(float randTab[3])
 
 void plane_from_points(std::vector<Vec> points)
 {
-	int  n = points.size();
-	Vec sum;
-	for (auto const& value : points)
+	int  n = 1000;
+	Vec sum(0, 0, 0);
+	for (int i = 0; i < n; i++)
 	{
-		sum = sum.add(value);
+		sum = sum.add(points[i]);
 	}
 	Vec centroid = sum.div(n);
 
@@ -30,9 +30,9 @@ void plane_from_points(std::vector<Vec> points)
 	float yy = 0.0; float yz = 0.0; float zz = 0.0;
 
 	Vec r;
-	for (auto const& value : points)
+	for (int i = 0; i < n; i++)
 	{
-		r = value.sub(centroid);
+		r = points[i].sub(centroid);
 		xx += r.x * r.x;
 		xy += r.x * r.y;
 		xz += r.x * r.z;
@@ -66,13 +66,18 @@ void plane_from_points(std::vector<Vec> points)
 		dir.y = xy * xz - yz * xx;
 		dir.z = det_z;
 	}
+	dir = dir.normalize();
+	Vec tmp(-0.95535f, -0.0765493, -0.717058);
+	tmp = tmp.normalize();
+	int end = 0;
 	//plane_from_point_and_normal(&centroid, &normalize(dir))
 }
 
 
 int main()
 {
-	PlyParser parser("../ressources/Ply/test10.ply");
+	PlyParser parser("../ressources/Ply/test11.ply");
 	srand(time(NULL));
+	plane_from_points(parser._vectors);
 	std::cout << "Bonjour !" << std::endl;
 }
