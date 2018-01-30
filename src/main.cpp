@@ -4,80 +4,79 @@
 #include "PlyParser.hpp"
 #include "Plane.hpp"
 
-void	getRand(float randTab[3])
+#include <sys/stat.h>
+
+void	writePointsToPlane(const std::vector<Vec>& points, const std::string& filename, const PlyParser &parser)
 {
-	randTab[0] = rand() % 1000;
-	randTab[1] = rand() % 1000;
-	randTab[2] = rand() % 1000;
-	while (randTab[1] == randTab[0])
-		randTab[0] = rand() % 1000;
-	while (randTab[2] == randTab[0] && randTab[2] != randTab[1])
-		randTab[2] = rand() % 1000;
+	const size_t numPoints(points.size());
+	std::stringstream ss;
+	ss << "ply" << std::endl
+		<< "format " << formatMap.at(parser.plyFormat) << std::endl
+		<< "comment" << parser.comments.front() << " & Adrien Bedel"<< std::endl
+		<< "element vertex " << numPoints << std::endl
+		<< "property" << parser.properties[0] << std::endl
+		<< "property" << parser.properties[1] << std::endl
+		<< "property" << parser.properties[2] << std::endl
+		<< "end_header" << std::endl;
+	for (auto point : points)
+		ss << point.print() << std::endl;
+
+	std::ofstream out(filename, std::ofstream::out);
+	out << ss.str();
+	out.close();
 }
 
-void plane_from_points(std::vector<Vec> points)
+inline bool existsTest(const std::string& name)
 {
-	int  n = 1000;
-	Vec sum(0, 0, 0);
-	for (int i = 0; i < n; i++)
-	{
-		sum = sum.add(points[i]);
-	}
-	Vec centroid = sum.div(n);
-
-	// Calc full 3x3 covariance matrix, excluding symmetries:
-	float xx = 0.0; float xy = 0.0; float xz = 0.0;
-	float yy = 0.0; float yz = 0.0; float zz = 0.0;
-
-	Vec r;
-	for (int i = 0; i < n; i++)
-	{
-		r = points[i].sub(centroid);
-		xx += r.x * r.x;
-		xy += r.x * r.y;
-		xz += r.x * r.z;
-		yy += r.y * r.y;
-		yz += r.y * r.z;
-		zz += r.z * r.z;
-	}
-
-	float det_x = yy * zz - yz * yz;
-	float det_y = xx * zz - xz * xz;
-	float det_z = xx * yy - xy * xy;
-
-	float det_max = std::max(std::max(det_x, det_y), det_z);
-
-	Vec dir;
-	if (det_max == det_x)
-	{
-		dir.x = det_x;
-		dir.y = xz * yz - xy * zz;
-		dir.z = xy * yz - xz * yy;
-	}
-	else if (det_max == det_x)
-	{
-		dir.x = xz * yz - xy * zz;
-		dir.y = det_y;
-		dir.z = xy * xz - yz * xx;
-	}
-	else
-	{
-		dir.x = xy * yz - xz * yy;
-		dir.y = xy * xz - yz * xx;
-		dir.z = det_z;
-	}
-	dir = dir.normalize();
-	Vec tmp(-0.95535f, -0.0765493, -0.717058);
-	tmp = tmp.normalize();
-	int end = 0;
-	//plane_from_point_and_normal(&centroid, &normalize(dir))
+	struct stat buffer;
+	return (stat(name.c_str(), &buffer) == 0);
 }
 
-
-int main()
+int errorCheck(int argc, char* argv[])
 {
-	PlyParser parser("../ressources/Ply/test11.ply");
-	srand(time(NULL));
-	plane_from_points(parser._vectors);
-	std::cout << "Bonjour !" << std::endl;
+	if (argc != 4)
+	{
+		std::cerr << "usage ./denoising path filename nbPointPerPlane" << std::endl;
+		std::cerr << "exemple : ./denoising ../ressources/Ply/ test.ply 1000" << std::endl;
+		return EXIT_FAILURE;
+	}
+	std::string path(argv[1]);
+	std::string fileName(argv[2]);
+	std::string outputFile("projected" + fileName);
+	if (existsTest(path + fileName) == false || existsTest(outputFile) == true)
+	{
+		std::cerr << path << fileName << " doesn't exists or "
+			<<	outputFile << " already exists" << std::endl;
+		return EXIT_FAILURE;
+	}
+}
+
+int main(int argc, char* argv[])
+{
+	if (errorCheck(argc, argv) == 1)
+		return (EXIT_FAILURE);
+
+	PlyParser parser(std::string(argv[1]) + std::string(argv[2]), atoi(argv[3]));
+	std::vector<Plane> planes;
+
+	Vec origin;
+	float dist;
+	std::vector<Vec>	projectedPoints;
+
+	for (auto const& vector : parser._vectors)
+	{
+		planes.push_back(Plane(vector));
+	}
+
+	for (int i = 0; i < planes.size(); i++)
+	{
+		for (auto const& point : parser._vectors[i])
+		{
+			origin = point.sub(planes[i]._p);
+			dist = origin.dot(planes[i]._p);
+			projectedPoints.push_back(Vec(point.sub(planes[i]._n.mult(dist))));
+		}
+	}
+	writePointsToPlane(projectedPoints, std::string("projected") + std::string(argv[2]), parser);
+	return (0);
 }

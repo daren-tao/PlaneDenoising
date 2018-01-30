@@ -23,19 +23,20 @@ const std::map<PlyFormat, std::string> formatMap = {
 
 class PlyParser
 {
-private:
+public:
 	PlyFormat plyFormat;
 	std::queue<std::string> comments;
-	std::queue<std::string> properties;
+	std::vector<std::string> properties;
 	int vertexNumber;
+	int _nbPointsPerPlane;
 
 public:
 	std::fstream _fs;
-	std::vector<Vec> _vectors;
+	std::vector<std::vector<Vec>> _vectors;
 
 
 public:
-	PlyParser(const std::string &fileName);
+	PlyParser(const std::string &fileName, int nbPointPerPlane);
 	~PlyParser();
 
 private:

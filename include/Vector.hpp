@@ -69,6 +69,7 @@ struct Vec
 	Vec sub(const Vec& v) const { return Vec(x - v.x, y - v.y, z - v.z); }
 	Vec add(const Vec& v) { return Vec(x + v.x, y + v.y, z + v.z); }
 	Vec div(const int& d) { return Vec(x / (float)d, y / (float)d, z / (float)d); }
+	Vec mult(const int& d) { return Vec(x * (float)d, y * (float)d, z * (float)d); }
 };
 
 #endif // !_VECTOR_HPP_

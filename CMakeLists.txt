@@ -9,7 +9,10 @@ include_directories(include)
 set(DENOISING 
 src/main.cpp
 include/PlyParser.hpp
-src/PlyParser.cpp)
+src/PlyParser.cpp
+include/Plane.hpp
+src/Plane.cpp
+include/Vector.hpp)
 
 
 add_executable(denoise ${DENOISING})

@@ -1,8 +1,9 @@
 #include "PlyParser.hpp"
 
-PlyParser::PlyParser(const std::string &fileName)
+PlyParser::PlyParser(const std::string &fileName, int nbPointPerPlane)
 {
 	_fs = std::fstream(fileName);
+	_nbPointsPerPlane = nbPointPerPlane;
 	parseHeader();
 	parseBody();
 }
@@ -36,7 +37,7 @@ void PlyParser::parseHeader()
 				isVertex = false;
 		}
 		else if (isVertex && first == "property") {
-			properties.push(rest);
+			properties.push_back(rest);
 		}
 		else if (first == "end_header")
 			break;
@@ -47,20 +48,19 @@ void PlyParser::parseBody()
 {
 	std::string line;
 	std::string floatArray[3];
+	std::vector<Vec> tmp;
 	while (std::getline(_fs, line))
 	{
 		int i = 0;
 		std::stringstream ssin(line);
 		for (int i = 0; ssin.good() && i < 3; i++)
 			ssin >> floatArray[i];
-		_vectors.push_back(Vec(std::strtof(floatArray[0].c_str(), NULL), std::strtof(floatArray[1].c_str(), NULL), std::strtof(floatArray[2].c_str(), NULL)));
+		tmp.push_back(Vec(std::strtof(floatArray[0].c_str(), NULL), std::strtof(floatArray[1].c_str(), NULL), std::strtof(floatArray[2].c_str(), NULL)));
+		if (tmp.size() == _nbPointsPerPlane)
+		{
+			_vectors.push_back(tmp);
+			tmp.clear();
+		}
+
 	}
 }
-
-//Vec PlyParser::getDirectionnalVector(int idxFirst, int idxSecond)
-//{
-//	if (idxFirst == idxSecond)
-//		idxSecond = (idxSecond + 1) % 1000;
-//	return (_vectors[idxSecond].sub(_vectors[idxFirst]));
-//}
-// 

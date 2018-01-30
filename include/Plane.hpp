@@ -8,34 +8,34 @@
 struct Plane
 {
 	// Plane equation n.dot(X) = d;
-	Vec n;
-	float d;
+	Vec _n;
+	float _d;
 
 	// point in the plane
-	Vec p;
+	Vec _p;
 
 	Plane(const Vec& n_, const float& d_, const Vec& p_)
-		: n(n_)
-		, d(d_)
-		, p(p_)
+		: _n(n_)
+		, _d(d_)
+		, _p(p_)
 	{}
 
 	Plane(Vec A, Vec B, Vec C)
 	{
 		if ((B.sub(A)).normalize().dot((C.sub(A)).normalize()) == 1)
-			n = Vec(0, 0, 0);
+			_n = Vec(0, 0, 0);
 		else
 		{
-			n = ((B.sub(A)).normalize()).cross((C.sub(A)).normalize());
-			n = n.normalize();
+			_n = ((B.sub(A)).normalize()).cross((C.sub(A)).normalize());
+			_n = _n.normalize();
 		}
-		d = n.dot(A);
-		p = A;
+		_d = _n.dot(A);
+		_p = A;
 	}
 
 	bool isOnPlane(Vec& v)
 	{
-		float res = std::fabs(v.dot(n) - d);
+		float res = std::fabs(v.dot(_n) - _d);
 		std::cout << res << std::endl;
 		return res < 0.1E-4;
 	}
@@ -44,28 +44,30 @@ struct Plane
 	{
 		std::stringstream os;
 		if (pretty)
-			os << "[" << n.x << ", " << n.y << ", " << n.z << ", " << d << "]";
+			os << "[" << _n.x << ", " << _n.y << ", " << _n.z << ", " << _d << "]";
 		else
-			os << std::fixed << std::setprecision(2) << n.print() << " " << d;
+			os << std::fixed << std::setprecision(2) << _n.print() << " " << _d;
 
 		return os.str();
 	}
 
 	Plane& operator+=(const Plane& plane)
 	{
-		n = n.add(plane.n);
-		d += plane.d;
-		p = p.add(plane.p);
+		_n = _n.add(plane._n);
+		_d += plane._d;
+		_p = _p.add(plane._p);
 		return *this;
 	}
 
 	Plane& operator/=(const int &divider)
 	{
-		n.div(divider);
-		d /= divider;
-		p.div(divider);
+		_n.div(divider);
+		_d /= divider;
+		_p.div(divider);
 		return *this;
 	}
+
+	Plane(std::vector<Vec> points);
 
 };
 
